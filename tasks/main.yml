@@ -10,5 +10,10 @@
   register: result
 
 - name: start an hdfs-journalnode container
-  command: docker run -d -h {{ ansible_hostname }} --dns {{ ansible_docker0.ipv4.address }} --dns 8.8.8.8 --dns-search node.dc1.consul -p={{ journalnode_port }}:8485 -v {{ ext_hadoop_volume }}:/var/hadoop -v {{ ext_hadoop_conf_volume }}:/hadoop/conf -name hdfs-journalnode gitinsky/hdfs-journalnode:0.1.0
+  command: docker run -d {% if docker_net_false|default(False) %} -n=false {% endif %} -h {{ ansible_hostname }}{% if docker_net_false|default(False) %}-jn{% endif %} --dns {{ ansible_docker0.ipv4.address }} --dns 8.8.8.8 --dns-search node.dc1.consul -p={{ journalnode_port }}:8485 -v {{ ext_hadoop_volume }}:/var/hadoop -v {{ ext_hadoop_conf_volume }}:/hadoop/conf -name hdfs-journalnode gitinsky/hdfs-journalnode:0.1.0
+  register: docker_id
   when: result|failed
+
+- name: start network
+  shell: /root/ovswork.sh br10 {{ docker_id.stdout }} {{ network_map[ '' + ansible_hostname + '-jn' ] }}/24 {{ network_map[ '_broadcast' ] }} {{ network_map['_gateway'] }}
+  when: (docker_id.changed == True) and (docker_net_false|default(False) == True)
