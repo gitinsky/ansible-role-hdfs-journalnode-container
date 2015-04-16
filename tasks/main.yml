@@ -10,7 +10,7 @@
   register: result
 
 - name: start an hdfs-journalnode container
-  command: docker run -d {% if docker_net_false|default(False) %} -n=false {% endif %} -h {{ ansible_hostname }}{% if docker_net_false|default(False) %}-jn{% endif %} --dns {{ ansible_docker0.ipv4.address }} --dns 8.8.8.8 --dns-search node.dc1.consul -p={{ journalnode_port }}:8485 -v {{ ext_hadoop_volume }}:/var/hadoop -v {{ ext_hadoop_conf_volume }}:/hadoop/conf -name hdfs-journalnode gitinsky/hdfs-journalnode:0.1.0
+  command: docker run -d {% if docker_net_false|default(False) %} -n=false {% endif %} -h {{ ansible_hostname }}{% if docker_net_false|default(False) %}-jn{% endif %} --dns {{ ansible_docker0.ipv4.address }} --dns 8.8.8.8 --dns-search node.dc1.consul -p={{ journalnode_port }}:8485 -v {{ ext_hadoop_volume }}:/var/hadoop -v {{ ext_hadoop_conf_volume }}:/hadoop/conf -name hdfs-journalnode gitinsky/hdfs-journalnode:0.1.1
   register: docker_id
   when: result|failed
 
